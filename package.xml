@@ -62,8 +62,8 @@
   <depend>bebop_driver</depend>
   <depend>bebop_msgs</depend>
   <!-- <depend>bebop_tools</depend> -->
-
-
+  <depend>bebop_app</depend>
+  <depend>apriltags2_ros</depend>
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
