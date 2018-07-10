@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="bebop_app" name="key_cam" type="key_cam.py"  output="screen"/>
+  <node pkg="bebop_app" name="cmd_pub" type="cmd_pub.py"/>
+  <node pkg="bebop_app" name="key_op" type="key_op.py" output="screen" launch-prefix="xterm -e" /> 
+</launch>
