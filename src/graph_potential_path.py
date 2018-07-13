@@ -42,15 +42,13 @@ def plot_grid_potential(map_test):
     
     x_path=(-10,)
     y_path=(-10,)
-    potential=(0,)
+    potential=(map_test.potential((x_path[-1],y_path[-1])),)
     time = (0,)
-    gradient=(0,)
 
     for x in range(1,1000):
         time = time+(x,)
         step = map_test.gradient((x_path[-1],y_path[-1]))
         potential = potential + (map_test.potential((x_path[-1], y_path[-1])),)
-        gradient = gradient + (step[0],)
         x_path = x_path + (x_path[-1]+step[0]*step_size,)
         y_path = y_path + (y_path[-1]+step[1]*step_size,)
 
