@@ -31,6 +31,8 @@ def plot_grid_potential(map_test):
     ax.set_zlim(0,100)
     ax.zaxis.set_major_locator(LinearLocator(10))
     ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+    ax.set_xlabel("x axis")
+    ax.set_ylabel("y axis")
 
     fig.colorbar(surf, shrink=0.5, aspect=5)
 
@@ -42,11 +44,13 @@ def plot_grid_potential(map_test):
     y_path=(-10,)
     potential=(0,)
     time = (0,)
+    gradient=(0,)
 
     for x in range(1,1000):
         time = time+(x,)
         step = map_test.gradient((x_path[-1],y_path[-1]))
         potential = potential + (map_test.potential((x_path[-1], y_path[-1])),)
+        gradient = gradient + (step[0],)
         x_path = x_path + (x_path[-1]+step[0]*step_size,)
         y_path = y_path + (y_path[-1]+step[1]*step_size,)
 
@@ -57,14 +61,27 @@ def plot_grid_potential(map_test):
 
     #Potential on Path
     ax3 = fig.add_subplot(2,2,2)
-    ax3.plot(time, potential, label="Potential v. Time")
     ax3.set_xlabel("time")
-    ax3.set_ylabel("potential")
+    ax3.plot(time,potential,label="Potential v. Time")
+    ax3.set_ylabel("Potential")
+    
 
     ax4 = fig.add_subplot(2,2,3)
     ax4.plot(x_path,y_path)
     
     print("{0},{1}".format(x_path[-1],y_path[-1]))
     plt.show()
-
+# Keep_out
 plot_grid_potential(pp.MapPotential(goal=pp.GoalPotential(location=(3,1),z=0.5,kind=2, d_threshold=5),obstacles=(pp.ObstaclePotential(location=(-3,-3), d_safe=15, r=2,n=10),pp.ObstaclePotential(location=(1,7), d_safe=10, r=3, n = 10))))
+
+#Keep_in
+plot_grid_potential(pp.MapPotential(goal=pp.GoalPotential(location=(3,1),z=2,kind=2, d_threshold=5),obstacles=(pp.ObstaclePotential(location=(-3,-3), d_safe=3, r=2,n=1, keep_out=2, max_potential=30),pp.ObstaclePotential(location=(1,7), d_safe=10, r=3, n = 1,keep_out=2,max_potential=30))))
+
+#Walls
+plot_grid_potential(pp.MapPotential(goal=pp.GoalPotential(location=(10,10),z=0.5,kind=2, d_threshold=5),obstacles=(pp.ObstaclePotential(location=(-3,-5), d_safe=5, m=-1,n=10,keep_out=1, kind=1, max_gradient=30, max_potential=30),pp.ObstaclePotential(location=(1,7), d_safe=5, m=-1, n = 0,keep_out=2, kind=1, max_gradient=30,max_potential=30))))
+
+#plot_grid_potential(pp.MapPotential(goal=pp.GoalPotential(location=(5,5),z=0,kind=2, d_threshold=5),obstacles=(pp.ObstaclePotential(location=(-3,-5), d_safe=5, m=-1,n=1,keep_out=1, kind=1, max_gradient=30, max_potential=30),)))
+
+#plot_grid_potential(pp.MapPotential(goal=pp.GoalPotential(location=(10,10),z=0.5,kind=2, d_threshold=5)))
+
+
