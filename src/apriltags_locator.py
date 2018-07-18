@@ -16,6 +16,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy
+from std_msgs.msg import Bool
 
 class ApriltagsLocator():
     def __init__(self, image=False):
@@ -25,6 +26,7 @@ class ApriltagsLocator():
         rospy.init_node("apriltag_locator")
         rospy.Subscriber("tag_detections", AprilTagDetectionArray, self.process_apriltag)
         self.pub = rospy.Publisher("tag_location", Point, queue_size = 10)
+        self.tag_found_publisher = rospy.Publisher("tag_found", Bool, queue_size = 1)
         # Video feeds only active when specified in constructor
         if image:
             rospy.Subscriber("/bebop/image_raw", Image, self.image_overlay)
@@ -42,13 +44,14 @@ class ApriltagsLocator():
         detections = data.detections
         # Only if the apriltag is detected
         if len(detections) > 0:
+            self.tag_found_publisher.publish(True)
             pose = detections[0].pose.pose.pose
             position = pose.position
-            f = 2.3
-            sx = 300
-            sy = 300
-            cx = 370
-            cy = 220
+            f = 1 
+            sx = 537.292878
+            sy = 527.000348
+            cx = 427.331854
+            cy = 240.226888
             z = f
             y = f*position.y/position.z
             x = f*position.x/position.z
@@ -57,6 +60,7 @@ class ApriltagsLocator():
             self.pub.publish(self.xp,self.yp,0)
         # Otherwise return origin
         else:
+            self.tag_found_publisher.publish(False)
             self.pub.publish(0,0,0)
 
     # Called when new frame from the camera comes in
