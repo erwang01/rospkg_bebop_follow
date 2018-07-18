@@ -1,11 +1,15 @@
 <launch>
   <arg name="namespace" default="bebop"/>
   <arg name="ip" default="192.168.1.123"/> 
+  <arg name="enable_image_overlay" default="False" />
   <include file="$(find bebop_driver)/launch/bebop_node.launch">
-    <arg name="ip" value="$(arg ip)"/>  <!-- check if this is overrident by bebop_node.launch-->
+    <arg name="ip" value="$(arg ip)"/>
   </include>
   <include file="$(find apriltags2_ros)/launch/continuous_detection.launch">
     <arg name="camera_name" value="$(arg namespace)"/>
     <arg name="image_topic" value="image_raw"/>
   </include>
+  <node pkg="bebop_follow" name="apriltags_locator" type="apriltags_locator.py">
+    <param name="enable_image_overlay" type="bool" value="$(arg enable_image_overlay)"/>
+  </node>
 </launch>

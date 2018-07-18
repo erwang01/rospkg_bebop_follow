@@ -1,8 +1,21 @@
 <launch>
   <arg name="namespace" default="bebop"/>
-  <arg name="ip" default="192.168.1.123"/> 
-  <include file="$(find bebop_driver)/launch/bebop_node.launch">
-    <arg name="ip" value="$(arg ip)"/>  <!-- check if this is overrident by bebop_node.launch-->
-  </include>
-
+  <arg name="ip" default="192.168.42.1"/>
+  <group ns="$(arg namespace)">
+    <include file="$(find bebop_follow)/launch/apriltags.launch">
+      <arg name="ip" value="$(arg ip)"/>
+      <arg name="namespace" value="$(arg namespace)"/>
+    </include>
+    <include file="$(find bebop_follow)/launch/key_cmd.launch"/>
+    <arg name="controller_topic" value="cmd_vel_control"/>
+    <arg name="operator_topic" value="cmd_vel_ops"/>
+    <node name="controller" pkg="bebop_follow" type="controller.py" output="screen">
+        <remap from="cmd_vel_set" to="$(controller_topic)"/>
+    </node>
+    <node name="state_machine" pkg="bebop_follow" type="states.py" output="screen">
+        <param name="controller_topic" value="$(arg controller_topic)"/>
+        <param name="operator_topic" value="$(arg operator_topic)"/>
+    </node>
+    <node name="operator" pkg="bebop_follow" type="operator.py" output="screen" launch-prefix="xterm -e" required="true"/>
+  </group>
 </launch>
