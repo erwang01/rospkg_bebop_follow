@@ -6,7 +6,7 @@
     <arg name="config_file" default="$(find bebop_driver)/config/defaults.yaml" />
     <arg name="camera_info_url" default="package://bebop_driver/data/$(arg drone_type)_camera_calib.yaml" />
     <group ns="$(arg namespace)">
-        <node pkg="bebop_driver" name="bebop_driver" type="bebop_driver_node" output="screen">
+        <node pkg="bebop_driver" name="bebop_driver" type="bebop_driver_node" output="screen" required="true">
             <param name="camera_info_url" value="$(arg camera_info_url)" />
             <param name="bebop_ip" value="$(arg ip)" />
             <rosparam command="load" file="$(arg config_file)" />

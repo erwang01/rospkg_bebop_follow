@@ -161,8 +161,8 @@ class StateMachine():
         self.rate = rospy.Rate(10) #10 Hz cycle
         rospy.Subscriber("tag_found", Bool, self.update_tag_found)
         rospy.Subscriber("operation_mode", String, self.update_operation_mode)
-        rospy.Subscriber("states/ardrone3/PilotingState/FlyingStateChanged", Ardrone3PilotingStateFlyingStateChanged, self.update_flying)
-        rospy.Subscriber("states/ardron3/PilotingState/AlertStateChanged", Ardrone3PilotingStateAlertStateChanged, self.update_alert)
+        rospy.Subscriber("bebop/states/ardrone3/PilotingState/FlyingStateChanged", Ardrone3PilotingStateFlyingStateChanged, self.update_flying)
+        rospy.Subscriber("bebop/states/ardron3/PilotingState/AlertStateChanged", Ardrone3PilotingStateAlertStateChanged, self.update_alert)
         self.rotation_controller = rospy.Publisher("rotation_controller", String, queue_size=1)
         self.location_controller = rospy.Publisher("location_controller", String, queue_size=1)
         self.cmd_vel_topic = rospy.Publisher("cmd_vel_topic", String, queue_size=1)

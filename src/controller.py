@@ -74,7 +74,7 @@ class ControllerCommand(object):
         rospy.Subscriber("tag_location", Point, self.update_tag_location)
 
         #Publishing Velocities
-        self.cmd_pub = rospy.Publisher("cmd_vel_set", Twist, queue_size=1)
+        self.cmd_pub = rospy.Publisher("bebop/cmd_vel_set", Twist, queue_size=1)
         self.cmd_vel = Twist()
         self.cmd_vel.linear.x = self.cmd_vel.linear.y = self.cmd_vel.linear.z = self.cmd_vel.angular.x = self.cmd_vel.angular.y = self.cmd_vel.angular.z = 0
 

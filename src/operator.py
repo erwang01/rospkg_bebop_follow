@@ -36,7 +36,7 @@ from bebop_msgs.msg import CommonCalibrationStateMagnetoCalibrationRequiredState
 #from bebop_msgs.msg import CommonCalibrationStateMagnetoCalibrationStartedChanged as MagnetoCalibrationProcess
 #from bebop_msgs.msg import CommonCalibrationStatePitotCalibrationStateChanged as PitotCalibrationState
 #from bebop_msgs.msg import CommonHeadlightsStateintensityChanged as HeadlightsStateintensity #TODO: check if this applies to Bebop2
-from bebop_msgs.msg import Ardrone3PilotingStateFlyingStateChanged
+from bebop_msgs.msg import Ardrone3PilotingStateFlyingStateChanged as FlyingState
 
 class operator_command():
    
@@ -45,9 +45,9 @@ class operator_command():
         # Initializing Messages
 	self.emptymsg = Empty()
         # Initializing Publications
-        self.takeoff = rospy.Publisher("takeoff", Empty, queue_size = 1) #Note this assumes a bebop namespace. When flying more than one bebop, need to change this.
-        self.land = rospy.Publisher("land", Empty, queue_size = 1)
-        self.emergency = rospy.Publisher("reset", Empty, queue_size = 1)
+        self.takeoff = rospy.Publisher("bebop/takeoff", Empty, queue_size = 1) #Note this assumes a bebop namespace. When flying more than one bebop, need to change this.
+        self.land = rospy.Publisher("bebop/land", Empty, queue_size = 1)
+        self.emergency = rospy.Publisher("bebop/reset", Empty, queue_size = 1)
         self.operation_mode = rospy.Publisher("operation_mode", String, queue_size = 1)
 
         # Initializing Subscriptions TODO Move this to the appropriate spot. If Operator command is soley for operator input then there should be another node for output. See if we can also make this a graphical interface.
@@ -60,42 +60,42 @@ class operator_command():
         self.overheatregulation = rospy.Subscriber("bebop/states/common/OverHeatState/OverHeatRegulationChanged", OverHeatRegulation, self.overheat_regulation_update)
 
         #Subscriptions On Flight Status
-        rospy.Subscriber("states/ardrone3/PilotingState/FlyingStateChanged", Ardrone3PilotingStateFlyingStateChanged, self.flying_update)
+        rospy.Subscriber("bebop/states/ardrone3/PilotingState/FlyingStateChanged", FlyingState, self.flying_update)
+        self.grounded=True
 
     #Logging
     def odom_update(self, data):
-        rospy.loginfo(rospy.get_caller_id() + " Odometry Update ")
+        rospy.loginfo(rospy.get_caller_id() + " Odometry Update \n\f\r")
         rospy.loginfo(data.twist.covariance)
-
     def camera_angle_update(self, data):
-        rospy.loginfo(rospy.get_caller_id() + " Camera Angle Update:")
-        rospy.loginfo("Pan: %0.1f", data.position[0])
-        rospy.loginfo("Tilt: %0.1f", data.position[1])
+        rospy.loginfo(rospy.get_caller_id() + " Camera Angle Update:\nPan: %0.1f   Tilt:%0.1f\n\f\r", data.position[0], data.position[1])
 
     def battery_update(self, data):
-        rospy.loginfo(rospy.get_caller_id() + " Battery Update %f\%", data.percent) 
+        rospy.loginfo(rospy.get_caller_id() + " Battery Update %f\n\f\r", data.percent) 
 
     def wifi_update(self, data):
-        rospy.loginfo(rospy.get_caller_id() + " Wifi Update %d dbm", data.rssi)
+        rospy.loginfo(rospy.get_caller_id() + " Wifi Update %d dbm\n\f\r", data.rssi)
 
     def overheat_update(self, data):
-        rospy.logwarn(rospy.get_caller_id() + " WARNING: OVERHEAT TEMPERATURE REACHED")
+        rospy.logwarn(rospy.get_caller_id() + " WARNING: OVERHEAT TEMPERATURE REACHED\n\f\r")
 
     def overheat_regulation_update(self, data):
         if data.regulationType == 0:
-            rospy.loginfo(rospy.get_caller_id() + "Over Heat Regulation: Ventilation")
+            rospy.loginfo(rospy.get_caller_id() + "Over Heat Regulation: Ventilation\n\f\r")
         elif data.regulationType == 1:
-            rospy.loginfo(rospy.get_caller_id() + "Over Heat Regulation: Switch Off")
+            rospy.loginfo(rospy.get_caller_id() + "Over Heat Regulation: Switch Off\n\f\r")
         else:
-            rospy.loginfo(rospy.get_caller_id() + "Over Heat Regulation: Unknown.")
-            rospy.logbug(rospy.get_caller_id() + "Unknown Over Heat Regulation Change")
+            rospy.loginfo(rospy.get_caller_id() + "Over Heat Regulation: Unknown.\n\f\r")
+            rospy.logwarn(rospy.get_caller_id() + "Unknown Over Heat Regulation Change\n\f\r")
             rospy.logbug(data)
 
     def flying_update(self, data):
-        if data.state == data.state_landed:
+        if data.state == FlyingState.state_landed:
             self.grounded = True
-        elif data.state == data.state_flying or data.state == data.state_hovering:
+        elif data.state == FlyingState.state_flying or data.state == FlyingState.state_hovering:
             self.grounded = False
+        else:
+            rospy.logwarn(str(data.state) + " is not 0,2 or 3")
 
     #Keyboard input
     def send(self):
@@ -108,39 +108,43 @@ class operator_command():
         while not rospy.is_shutdown():
             key = getch()
 	    #Running through all possibilities and publishing the appropriate commands.
-
+            # E STOP
+            if key == " ":
+                self.emergency.publish()
+                rospy.loginfo("Emergency Stop. Landing\n\f\r")
             #Switch modes b/w Manual and Follow
-            if key == "m":
+            elif key == "m":
                 if manual == True:
-                    rospy.loginfo("The mode is already Manual")
+                    rospy.loginfo("The mode is already Manual\n\f\r")
                 #TODO launch key_cmd.launch
                 else:
                     manual = True
-                    rospy.loginfo("Entering Manual mode")
+                    rospy.loginfo("Entering Manual mode\n\f\r")
                     self.operation_mode.publish('manual')
             elif key == "f":
                 if manual == False:
-                    rospy.loginfo("The mode is already Follow")
+                    rospy.loginfo("The mode is already Follow\n\f\r")
                 else:
                     manual = False
-                    rospy.loginfo("Entering Follow mode")
+                    rospy.loginfo("Entering Follow mode\n\f\r")
                     self.operation_mode.publish('follow')
             #Take Off
             elif key == ",":
                 if self.grounded == True:
                     self.takeoff.publish(self.emptymsg)
-                    rospy.loginfo("Taking off")
+                    rospy.loginfo("Taking off\n\f\r")
                 else:
-                    rospy.loginfo("Already in the air")
+                    rospy.loginfo("Already in the air\n\f\r")
             #Landing
             elif key == ".":
-                if self.grounded == False:
+                if self.grounded == False:#TODO Fix self.grounded.
+                #if True:
                     self.land.publish(self.emptymsg)
-                    rospy.loginfo("Landing")
+                    rospy.loginfo("Landing\n\f\r")
                 else:
-                    rospy.loginfo("Already Grounded")
+                    rospy.loginfo("Already Grounded\n\f\r")
             elif key == "z":
-                rospy.loginfo("Shutdown initiated")
+                rospy.logwarn("Shutdown initiated")
                 rospy.signal_shutdown("Shutting down initiated by operator")
             else:
 	        pass
@@ -158,6 +162,7 @@ def operator():
     print("Press ',' to take off.\n")
     print("Press '.' to land.\n")
     print("Press 'z' to terminate.\n")
+    print("Press ' ' for E-STOP. \n")
 
     while not rospy.is_shutdown():
         kc.send()

@@ -1,5 +1,8 @@
 <launch>
-  <node pkg="bebop_app" name="key_cam" type="key_cam.py"  output="screen" launch-prefix="xterm -e"/>
+  <arg name="operator_topic" default="cmd_vel_set"/>
+  <node pkg="bebop_app" name="key_cam" type="key_cam.py"  output="screen" launch-prefix="terminator -x"/>
   <node pkg="bebop_app" name="cmd_pub" type="cmd_pub.py"/>
-  <node pkg="bebop_app" name="key_op" type="key_op.py" output="screen" launch-prefix="xterm -e" /> 
+  <node pkg="bebop_app" name="key_op" type="key_op.py" output="screen" launch-prefix="terminator -x">
+    <remap from="cmd_vel_set" to="$(arg operator_topic)"/>
+  </node> 
 </launch>

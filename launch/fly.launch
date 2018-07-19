@@ -6,16 +6,18 @@
       <arg name="ip" value="$(arg ip)"/>
       <arg name="namespace" value="$(arg namespace)"/>
     </include>
-   <arg name="controller_topic" value="cmd_vel_control"/>
+    <arg name="controller_topic" value="cmd_vel_control"/>
     <arg name="operator_topic" value="cmd_vel_ops"/>
     <node name="controller" pkg="bebop_follow" type="controller.py" output="screen">
-        <remap from="cmd_vel_set" to="$(arg controller_topic)"/>
+      <remap to="cmd_vel_set" from="$(arg controller_topic)"/>
     </node>
     <node name="state_machine" pkg="bebop_follow" type="states.py" output="screen">
-        <param name="controller_topic" value="$(arg controller_topic)"/>
-        <param name="operator_topic" value="$(arg operator_topic)"/>
+      <param name="controller_topic" value="$(arg controller_topic)"/>
+      <param name="operator_topic" value="$(arg operator_topic)"/>
     </node>
-    <node name="operator" pkg="bebop_follow" type="operator.py" output="screen" launch-prefix="xterm -e" required="true"/>
-    <include file="$(find bebop_follow)/launch/key_cmd.launch"/>
+    <node name="operator" pkg="bebop_follow" type="operator.py" output="screen" launch-prefix="terminator -x" required="true"/>
+    <include file="$(find bebop_follow)/launch/key_cmd.launch">
+      <arg name="operator_topic" value="$(arg operator_topic)"/>
+    </include>
   </group>
 </launch>
