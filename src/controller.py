@@ -60,7 +60,7 @@ class PotentialController(Controller):
         np.clip(values,-1,1)
 
 # An aggregation of controllers. In this case: Location and Rotation.
-# Pushes commands out to the cmd_pub node at 100ms intervals
+# Pushes commands out to the cmd_pub_m node at 100ms intervals
 class ControllerCommand(object):
     def __init__(self):
         rospy.init_node("controller_command")

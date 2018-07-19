@@ -36,7 +36,7 @@ from bebop_msgs.msg import CommonCalibrationStateMagnetoCalibrationRequiredState
 #from bebop_msgs.msg import CommonCalibrationStateMagnetoCalibrationStartedChanged as MagnetoCalibrationProcess
 #from bebop_msgs.msg import CommonCalibrationStatePitotCalibrationStateChanged as PitotCalibrationState
 #from bebop_msgs.msg import CommonHeadlightsStateintensityChanged as HeadlightsStateintensity #TODO: check if this applies to Bebop2
-from bebop_msgs.msg import Ardrone3PilotingStateAlertStateChanged
+from bebop_msgs.msg import Ardrone3PilotingStateFlyingStateChanged
 
 class operator_command():
    
@@ -73,7 +73,7 @@ class operator_command():
         rospy.loginfo("Tilt: %0.1f", data.position[1])
 
     def battery_update(self, data):
-        rospy.loginfo(rospy.get_caller_id() + " Battery Update %d\%", data.percent) 
+        rospy.loginfo(rospy.get_caller_id() + " Battery Update %f\%", data.percent) 
 
     def wifi_update(self, data):
         rospy.loginfo(rospy.get_caller_id() + " Wifi Update %d dbm", data.rssi)

@@ -13,8 +13,7 @@ State Machine for the Bebop Follow package
 To be used in conjucntion with operator.py and potential_path.py
 """
 import rospy
-import roslib
-roslib.load_manifest('bebop_follow')
+
 from std_msgs.msg import String
 from std_msgs.msg import Empty
 from std_msgs.msg import Bool
@@ -23,18 +22,19 @@ from bebop_msgs.msg import Ardrone3PilotingStateAlertStateChanged
 
 #TODO ensure that follow does not write while operator is writing and vice versa.
 
-class State():
+class State(object):
     def __init__(self, rotation_controller, location_controller):
         self.rotation_controller = rotation_controller
         self.location_controller = location_controller
-        print("Processing current state: {0}".format(self.__name__))
+        #print("Processing current state: {0}".format(self.__name__))
 
     def run(self):
-        print("State {0} is running".format(self.__name__))
+        pass
+        #print("State {0} is running".format(self.__name__))
 
     def next(self, event):
-        print("State {0} is interrupted by {1}".format(self.__name__, event.__name__))
-
+        pass
+        #print("State {0} is interrupted by {1}".format(self.__name__, event.__name__))
 # Search State
 # Mode: Follow
 # Conditions: Lost April Tag
@@ -156,17 +156,18 @@ def FlyingState(State):
 
 #State Machine Itself. Subscribes to various topics and listens for an event update at which point it fires off the next method in the current state. Also runs the run method of the current state at 100ms intervals
 class StateMachine():
-    def __init__(self, state='grounded'):
+    def __init__(self):
         rospy.init_node('state_machine')
         self.rate = rospy.Rate(10) #10 Hz cycle
         rospy.Subscriber("tag_found", Bool, self.update_tag_found)
         rospy.Subscriber("operation_mode", String, self.update_operation_mode)
         rospy.Subscriber("states/ardrone3/PilotingState/FlyingStateChanged", Ardrone3PilotingStateFlyingStateChanged, self.update_flying)
-        rospy.Subscriber("states/ardron3/PilotingState/AlertStateChanged", Ardrone3PilotingStateAlertStateChanged, state.update_alert)
-        self.state = state
+        rospy.Subscriber("states/ardron3/PilotingState/AlertStateChanged", Ardrone3PilotingStateAlertStateChanged, self.update_alert)
         self.rotation_controller = rospy.Publisher("rotation_controller", String, queue_size=1)
         self.location_controller = rospy.Publisher("location_controller", String, queue_size=1)
         self.cmd_vel_topic = rospy.Publisher("cmd_vel_topic", String, queue_size=1)
+        self.state = GroundedState(self.rotation_controller,self.location_controller)
+        self.tag_found = False
 
     def run(self):
         while not rospy.is_shutdown():
@@ -188,23 +189,23 @@ class StateMachine():
         elif data.data == 'follow':
             self.cmd_vel_topic.publish(rospy.get_param("controller_topic"))
             self.state = self.state.next('follow')
-        else
+        else:
             rospy.logwarn("Unknown mode " + data.data)
 
     def update_alert(self, data):
         if data.state == data.state_low_battery or data.state == data.state_critical_battery:
             self.state = self.state.next('low battery')
-        else
+        else:
             rospy.logwarn("Other warning: " + str(data.state))
 
     def update_flying(self, data):
         if data.state == data.state_landed:
             self.state_landed = self.state.next("grounded")
-        elif data.state == data.state_hovering or data.state == data.state_flying
+        elif data.state == data.state_hovering or data.state == data.state_flying:
             self.state = self.state.next("flying")
         elif data.state == data.state_emergency_landing:
             rospy.logwarn("Emergency Landing State Entered")
-        else
+        else:
             rospy.loginfo(data)
         
 
