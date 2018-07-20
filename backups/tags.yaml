@@ -19,7 +19,7 @@
 #   ]
 standalone_tags:
   [
-    {id: 0, size: .1, name: "AprilBebop"}
+    {id: 0, size: .06, name: "AprilBebop"}
   ]
 # ## Tag bundle definitions
 # ### Remarks

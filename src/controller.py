@@ -79,7 +79,8 @@ class ControllerCommand(object):
         self.cmd_vel.linear.x = self.cmd_vel.linear.y = self.cmd_vel.linear.z = self.cmd_vel.angular.x = self.cmd_vel.angular.y = self.cmd_vel.angular.z = 0
 
         #Setting the Controllers
-        #self.location_controller = PotentialController(
+        self.location_controller_hover = Controller(0,0)
+        self.location_controller = self.location_controller_hover
         self.rotation_controller_follow = PotentialController(
                 goal=pp.GoalPotential(location=(320,184), z=0.05, kind='conic', d_threshold=50),
                 obstacles=(pp.ObstaclePotential(location=(320,184),kind='circle', d_safe=50, r=180, n= 0.01, keep_out='in', max_gradient=3),))
@@ -91,7 +92,7 @@ class ControllerCommand(object):
         if controller_type == 'location':
             if type(data) is String:
                 if data.data == 'hover':
-                    pass
+                    self.location_controller =  self.location_controller_hover
                 elif data.data == 'follow':
                     pass
             #self.location_controller = data.something
@@ -114,7 +115,7 @@ class ControllerCommand(object):
     # query controllers and publish commands at 100ms intervals 
     def run(self):
         while not rospy.is_shutdown():
-            #self.cmd_vel.linear.x, self.cmd_vel.linear.y = self.location_controller.update(self.position)
+            self.cmd_vel.linear.x, self.cmd_vel.linear.y = self.location_controller.update(self.position)
             self.cmd_vel.angular.z = self.rotation_controller.update(self.tag_pixel_coordinate)[0]
             self.cmd_pub.publish(self.cmd_vel)
             self.rate.sleep()
